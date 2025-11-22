@@ -77,32 +77,9 @@ Interpretação das mensagens do usuário
 Contém chaves e tokens necessários 
 4.3 Diagrama da Arquitetura
 
-   ┌───────────────────────────────────────────┐
-│                  Usuário                  │
-└───────────────────┬───────────────────────┘
-                    │
-                    ▼
-┌───────────────────────────────────────────┐
-│            WhatsApp Cloud API             │
-└───────────────────┬───────────────────────┘
-                    │
-                    ▼
-   ┌──────────────────────────────────┐     ┌──────────────────────────────────┐
-   │           Webhook (Flask)        │  →  │       Parser de Comandos         │
-   └──────────────────┬───────────────┘     └──────────────────┬──────────────┘
-                      │                                        │
-                      └────────────────────────────────────────┘
-                                       │
-                                       ▼
-                  ┌───────────────────────────────────────────┐
-                  │               Engine do Jogo              │
-                  │    (carteira, compras, vendas, ranking)   │
-                  └───────────────────┬───────────────────────┘
-                                      │
-                                      ▼
-                  ┌───────────────────────────────────────────┐
-                  │      Alpha Vantage (preço em tempo real)  │
-                  └───────────────────────────────────────────┘
+Usuário -> WhatsApp Cloud API -> Webhook (Flask) -> Parsers de Comando
+
+(Webhook + Parsers) -> Engine do Jogo (carteiras, compras, vendas, ranking) -> Alpha Vantage (preço em tempo real)
 
  ________________________________________
 5. Fluxo da Experiência do Usuário
