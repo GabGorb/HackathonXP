@@ -3,6 +3,8 @@
 from dataclasses import dataclass, field
 from typing import Dict, List
 import datetime
+import os
+import requests
 
 # Ativos permitidos no jogo (pode ser estático no MVP)
 ASSETS = {
@@ -13,7 +15,61 @@ ASSETS = {
     "MGLU3": 2.45,
 }
 
-INITIAL_CASH = 10000.0
+DEFAULT_INITIAL_CASH = 10000.0
+
+
+ALPHA_VANTAGE_API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")
+ALPHA_VANTAGE_URL = "https://www.alphavantage.co/query"
+
+# Mapeia tickers do jogo para o símbolo na API (B3 costuma usar .SA)
+ALPHA_SYMBOLS = {
+    "PETR4": "PETR4.SA",
+    "ITUB4": "ITUB4.SA",
+    "VALE3": "VALE3.SA",
+    "BOVA11": "BOVA11.SA",
+    "MGLU3": "MGLU3.SA",
+}
+
+
+def get_live_price(ticker: str) -> float:
+    """
+    Busca o preço ao vivo na Alpha Vantage.
+    Se der erro ou não tiver API key, retorna 0.0
+    (o Tournament depois faz fallback pro ASSETS).
+    """
+    if not ALPHA_VANTAGE_API_KEY:
+        print("ALPHA_VANTAGE_API_KEY não configurada, usando preço estático.")
+        return 0.0
+
+    symbol = ALPHA_SYMBOLS.get(ticker.upper())
+    if not symbol:
+        print(f"Ticker {ticker} não mapeado para Alpha Vantage.")
+        return 0.0
+
+    params = {
+        "function": "GLOBAL_QUOTE",
+        "symbol": symbol,
+        "apikey": ALPHA_VANTAGE_API_KEY,
+    }
+
+    try:
+        resp = requests.get(ALPHA_VANTAGE_URL, params=params, timeout=10)
+        data = resp.json()
+        quote = data.get("Global Quote") or data.get("Global_Quote")
+        if not quote:
+            print("Resposta da API sem 'Global Quote':", data)
+            return 0.0
+
+        price_str = quote.get("05. price")
+        if not price_str:
+            print("Campo '05. price' não encontrado na resposta:", quote)
+            return 0.0
+
+        return float(price_str)
+    except Exception as e:
+        print("Erro ao buscar preço ao vivo:", e)
+        return 0.0
+
 
 
 @dataclass
@@ -27,16 +83,17 @@ class Position:
 class Player:
     phone: str  # id do jogador (número do WhatsApp)
     name: str = ""
-    cash: float = INITIAL_CASH
-    positions: Dict[str, Position] = field(default_factory=dict)
+    cash: float = 0.0  # vai ser definido pelo torneio
+    positions: Dict[str, "Position"] = field(default_factory=dict)
+
 
     def total_equity(self) -> float:
-        """Valor total da carteira (caixa + posição em ações)."""
         portfolio_value = 0.0
         for pos in self.positions.values():
-            current_price = ASSETS.get(pos.ticker, 0.0)
+            current_price = get_live_price(pos.ticker) or ASSETS.get(pos.ticker, 0.0)
             portfolio_value += pos.quantity * current_price
         return self.cash + portfolio_value
+
 
     def diversification_score(self) -> float:
         """
@@ -58,28 +115,82 @@ class Trade:
 
 
 class Tournament:
-    def __init__(self, name: str, days_duration: int = 7):
+    def __init__(
+        self,
+        name: str,
+        days_duration: int = 7,
+        initial_cash: float = DEFAULT_INITIAL_CASH,
+        max_players: int | None = None,
+    ):
         self.name = name
         self.start_date = datetime.datetime.now()
         self.end_date = self.start_date + datetime.timedelta(days=days_duration)
+        self.initial_cash = initial_cash
+        self.max_players = max_players
+        self.days_duration = days_duration
+
         self.players: Dict[str, Player] = {}
         self.trades: List[Trade] = []
+
+    def configure(
+        self,
+        max_players: int | None = None,
+        days_duration: int | None = None,
+        initial_cash: float | None = None,
+    ):
+        """Permite reconfigurar o torneio (ex: no início do jogo)."""
+        if max_players is not None:
+            self.max_players = max_players
+
+        if days_duration is not None:
+            self.days_duration = days_duration
+            self.start_date = datetime.datetime.now()
+            self.end_date = self.start_date + datetime.timedelta(days=days_duration)
+
+        if initial_cash is not None:
+            self.initial_cash = initial_cash
+
+        # opcional: resetar jogadores/posições se você quiser um torneio novo
+        # self.players.clear()
+        # self.trades.clear()
 
     # ---------- Jogadores --------------
 
     def join_player(self, phone: str, name: str = "") -> Player:
-        if phone not in self.players:
-            self.players[phone] = Player(phone=phone, name=name)
-        return self.players[phone]
+        # Se já está no torneio, só atualiza o nome (se vier) e retorna
+        if phone in self.players:
+            player = self.players[phone]
+            if name:
+                player.name = name
+            return player
+
+        # Checa limite de players
+        if self.max_players is not None and len(self.players) >= self.max_players:
+            raise ValueError(
+                f"Limite de {self.max_players} jogadores já foi atingido."
+            )
+
+        # Cria jogador com saldo inicial definido no torneio
+        player = Player(phone=phone, name=name, cash=self.initial_cash)
+        self.players[phone] = player
+        return player
+
 
     def get_player(self, phone: str) -> Player | None:
         return self.players.get(phone)
 
     # ---------- Preços (MVP) --------------
-
     def get_price(self, ticker: str) -> float:
-        """No MVP, usa o preço fixo de ASSETS."""
-        return ASSETS.get(ticker.upper(), 0.0)
+        ticker = ticker.upper()
+        live_price = get_live_price(ticker)
+        if live_price > 0:
+            return live_price
+
+        fallback = ASSETS.get(ticker, 0.0)
+        print(f"[FALLBACK] Usando preço estático de {ticker} = {fallback}")
+        return fallback
+
+
 
     # ---------- Operações --------------
 
@@ -129,11 +240,13 @@ class Tournament:
                 timestamp=datetime.datetime.now(),
             )
         )
+        
 
         return (
-            f"✅ Compra realizada: {quantity}x {ticker} a R$ {price:.2f}.\n"
+            f"✅ Compra realizada: {quantity}x {ticker} a R$ {price:.2f} (preço ao vivo).\n"
             f"Saldo atual: R$ {player.cash:.2f}."
         )
+
 
     def sell(self, phone: str, ticker: str, quantity: int) -> str:
         ticker = ticker.upper()
@@ -251,6 +364,5 @@ class Tournament:
             )
 
         return "\n".join(lines)
-    
-    # app.py
+
 
