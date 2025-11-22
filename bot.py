@@ -97,7 +97,12 @@ def parse_command(phone: str, text: str) -> str:
 
     if cmd == "entrar":
         name = " ".join(parts[1:]) if len(parts) > 1 else ""
-        player = tournament.join_player(phone, name=name)
+        try:
+            player = tournament.join_player(phone, name=name)
+        except ValueError as e:
+            # erro de limite de jogadores
+            return f"⚠️ Não foi possível entrar no torneio: {e}"
+
         return (
             f"🎮 Você entrou no torneio, {player.name or player.phone}!\n"
             f"Saldo inicial: R$ {player.cash:.2f}.\n"
