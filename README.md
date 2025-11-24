@@ -1,154 +1,251 @@
-📘 DOCUMENTO DE ESCOPO — FINANCEGAME XP
+📘 DOCUMENTO DE ESCOPO — INVESTCUP
+________________________________________
 1. Visão Geral do Problema
-A maioria dos jovens brasileiros não possui educação financeira prática, aprendendo sobre investimentos apenas quando já adultos.
-Ao mesmo tempo, milhões de jovens entram em contato cedo com jogos gamificados de vício e azar, como “tigrinho” e derivados — que criam:
-•	comportamento compulsivo
-•	prejuízo financeiro real
-•	frustração e afastamento do mundo de investimentos sérios
-Ou seja: a primeira experiência financeira de muitos jovens é negativa, arriscada e sem educação.
-O desafio do edital pede exatamente uma solução que mude a relação do jovem com finanças, oferecendo uma experiência que seja:
+A alfabetização financeira no Brasil permanece extremamente baixa. A maioria dos jovens:
+• cresce sem orientação prática sobre como investir;
+• não entende riscos, patrimônio ou diversificação;
+• sente medo e insegurança ao iniciar sua vida financeira;
+• tem como primeiro contato jogos de azar digitais (“tigrinho” e similares), que incentivam impulsividade, perdas e vício.
+Ou seja:
+A primeira experiência financeira do jovem brasileiro é, muitas vezes, negativa, arriscada e deseducativa.
+O desafio atual é reverter esse cenário, oferecendo uma experiência:
 ✔ divertida
-✔ intuitiva
-✔ próxima da realidade
-✔ social e cooperativa
-✔ acessível para qualquer pessoa
-Nosso projeto nasce exatamente dessa lacuna.
+✔ segura
+✔ educativa
+✔ social
+✔ baseada em mercado real
+✔ acessível via WhatsApp, plataforma que todos já usam
 ________________________________________
 2. Proposta de Valor
-Criamos o Cartola de Investimentos, um jogo educacional que simula um mini-mercado financeiro dentro do WhatsApp.
-Assim como no “Cartola FC” você monta seu time, aqui você monta sua carteira de ações e compete com seus amigos para:
-•	diversificar melhor
-•	ganhar mais patrimônio
-•	tomar decisões inteligentes
-•	aprender conceitos financeiros reais
-A experiência é totalmente gamificada, com ranking, carteira, compra e venda de ações e feedback educativo.
-Além disso, o jogo cria uma alternativa positiva ao vício dos apps de azar:
-se existe um jogo que faz o jovem perder dinheiro, por que não criar um jogo que faz ele aprender a ganhar dinheiro?
+Criamos o InvestCup, um fantasy game financeiro dentro do WhatsApp — simples, acessível e sem necessidade de instalar aplicativos.
+No InvestCup, o jovem:
+• monta sua carteira;
+• compra e vende ações reais (preços reais de mercado);
+• compete em um ranking global;
+• recebe comentários educativos gerados por IA;
+• aprende de forma prática, jogando.
+A experiência inclui:
+✔ ranking global
+✔ carteira persistente
+✔ preços reais via Alpha Vantage
+✔ comentários gerados por IA (estilo narrador empolgado)
+✔ histórico completo salvo no Firebase
+✔ aprendizado natural sobre risco, diversificação, patrimônio e tomada de decisão
+Se existem jogos que ensinam jovens a perder dinheiro, por que não criar um que ensine a ganhar?
 ________________________________________
 3. Objetivos da Solução
-🎯 Objetivo principal
-Dar ao jovem seu primeiro contato saudável e divertido com investimentos, dentro de uma plataforma que ele já usa: o WhatsApp.
-🎯 Objetivos específicos
-•	Ensinar conceitos reais do mercado (diversificação, patrimônio, preço médio, risco).
-•	Reduzir a fricção: não é necessário baixar nenhum aplicativo.
-•	Criar um ambiente social, competitivo e educativo.
-•	Oferecer uma alternativa gamificada e não viciante, diferente dos jogos de azar.
-•	Reduzir o medo inicial de começar a investir.
-•	Estimular conversas sobre educação financeira entre amigos e família.
+🎯 Objetivo Principal
+Introduzir jovens no mundo dos investimentos de forma saudável, divertida e acessível, usando o WhatsApp como canal natural de entrada.
+🎯 Objetivos Específicos
+• Ensinar conceitos reais de diversificação, risco, patrimônio e estratégia.
+• Reduzir a barreira de entrada (não precisa instalar aplicativo).
+• Criar ambiente social e cooperativo.
+• Estimular conversas sobre dinheiro entre amigos, escolas e famílias.
+• Substituir experiências negativas por uma alternativa educativa e gamificada.
+• Desenvolver hábitos financeiros sustentáveis desde cedo.
 ________________________________________
-4. Arquitetura da Solução
-A arquitetura foi projetada para ser simples, extensível e robusta.
-4.1 Visão Geral
-Usuário → WhatsApp → Webhook da Meta → Backend Flask → Motor do Jogo → WhatsApp
-4.2 Componentes
+4. Arquitetura Atualizada da Solução
+4.1 Visão Geral do Fluxo
+Usuário → WhatsApp → Webhook Meta → Flask → Engine InvestCup → Firebase → IA → WhatsApp
+________________________________________
+4.2 Componentes Principais
+________________________________________
 ✔ 1. WhatsApp Cloud API (Meta)
-•	Recebe mensagens do usuário
-•	Envia respostas do bot
-•	Não exige instalar aplicativo novo
-✔ 2. Backend (Flask / Python)
-Localizado no arquivo app.py 
-•	Endpoints de webhook
-•	Roteamento de mensagens
-•	Módulo de envio de mensagens
-•	Integração com a API da Meta
-✔ 3. Motor do Jogo (game_engine.py)
-Módulo principal da lógica do jogo 
-•	Gerenciamento de jogadores
-•	Simulação de carteira
-•	Registro de compras e vendas
-•	Cálculo de ranking
-•	Lógica de diversificação
-•	Cálculo de patrimônio total
-✔ 4. Integração com Mercado (Alpha Vantage)
-•	Consulta de preço ao vivo
-•	Fallback automático caso falhe
-•	Mapeamento para tickers da B3
-✔ 5. Parser de comandos (bot.py)
-Interpretação das mensagens do usuário 
-•	ajuda
-•	ativos
-•	configurar
-•	entrar
-•	comprar
-•	vender
-•	carteira
-•	ranking
-✔ 6. Arquivo de Configuração (.env)
-Contém chaves e tokens necessários 
-4.3 Diagrama da Arquitetura
+• Recebe mensagens dos usuários
+• Envia respostas automaticamente
+• Permite que qualquer pessoa interaja com o InvestCup
+________________________________________
+✔ 2. Backend Python (Flask)
+• Endpoint /webhook
+• Roteamento das mensagens
+• Integração com Firebase, IA e Alpha Vantage
+• Envio de respostas ao WhatsApp
+________________________________________
+✔ 3. Engine do Jogo (game_engine.py)
+Gerencia:
+• registro de jogadores
+• carteira e patrimônio
+• compras e vendas
+• precificação em tempo real
+• ranking global
+• diversificação
+• salvamento automático
+________________________________________
+✔ 4. Banco de Dados (Firebase Firestore)
+• Armazena jogadores
+• Mantém a carteira persistente
+• Suporta partidas contínuas e retornos posteriores
+• Permite ranking global real
+________________________________________
+✔ 5. Integração com Mercado (Alpha Vantage)
+• Preços reais de ativos da B3
+• Atualizações em tempo real
+• Fallback automático quando necessário
+________________________________________
+✔ 6. Narrador IA (Groq API)
+• Gera comentários dinâmicos sobre o ranking
+• Linguagem divertida e motivacional
+• Engaja jogadores
+• Respostas rápidas e custo baixo
+________________________________________
+✔ 7. Interpretador de Comandos (bot.py)
+Comandos suportados:
+• entrar Nome
+• ativos
+• comprar TICKER QTD
+• vender TICKER QTD
+• carteira
+• ranking
+• ajuda
+________________________________________
+4.3 Diagrama Textual do Fluxo
+┌──────────────────────┐
+│        Usuário        │
+│     (WhatsApp App)    │
+└───────────┬───────────┘
+            │ Mensagem
+            ▼
+┌──────────────────────┐
+│  WhatsApp Cloud API  │
+│        (Meta)         │
+└───────────┬───────────┘
+            │ Envia evento via webhook
+            ▼
+┌──────────────────────┐
+│     Servidor Flask    │
+│        (app.py)       │
+└───────────┬───────────┘
+            │ Extrai texto e telefone
+            ▼
+┌──────────────────────┐
+│  Parser de Comandos   │
+│       (bot.py)        │
+└───────────┬───────────┘
+            │ Interpreta o comando
+            ▼
+┌────────────────────────────────┐
+│      Motor do Jogo (Engine)    │
+│       (game_engine.py)         │
+│  - carteira                     │
+│  - compra/venda                 │
+│  - patrimônio                   │
+│  - ranking                      │
+└───────────┬───────────┬────────┘
+            │            │
+            │            │
+            ▼            ▼
+┌──────────────────┐   ┌────────────────────┐
+│ Firebase Firestore│   │   IA Narradora     │
+│ (persistência)    │   │   (Groq API)       │
+└──────────────┬────┘   └──────────┬────────┘
+               │  atualiza/consulta │
+               └──────────┬────────┘
+                          ▼
+                 ┌────────────────┐
+                 │  Resposta Final │
+                 │ (texto formatado)│
+                 └─────────┬────────┘
+                           │
+                           ▼
+                 ┌──────────────────────┐
+                 │ WhatsApp Cloud API   │
+                 │ (envia ao usuário)   │
+                 └─────────┬────────────┘
+                           │
+                           ▼
+                 ┌──────────────────────┐
+                 │        Usuário        │
+                 │  recebe resposta 💬   │
+                 └──────────────────────┘
 
-Usuário -> WhatsApp Cloud API -> Webhook (Flask) -> Parsers de Comando
+ 
+________________________________________
 
-(Webhook + Parsers) -> Engine do Jogo (carteiras, compras, vendas, ranking) -> Alpha Vantage (preço em tempo real)
-
- ________________________________________
 5. Fluxo da Experiência do Usuário
-1.	O usuário entra no grupo do WhatsApp do torneio.
-2.	O admin envia: configurar 10 7 50000
-3.	Cada pessoa envia: entrar Gabriel
-4.	Para ver os ativos disponíveis: ativos
-5.	Para comprar: comprar PETR4 2
-6.	Para vender: vender VALE3 1
-7.	Para consultar a carteira: carteira
-8.	Para acompanhar o jogo: ranking
+1.	O usuário manda mensagem ao número oficial do InvestCup.
+2.	Digita entrar Gabriel.
+3.	O sistema registra o jogador no Firebase.
+4.	Usa o comando ativos para ver opções.
+5.	Compra ações reais com: comprar PETR4 10.
+6.	Consulta sua carteira com carteira.
+7.	Vê a classificação global com ranking.
+8.	Recebe comentário empolgado gerado por IA.
 ________________________________________
 6. Didática da Solução
-O que o jovem aprende naturalmente ao jogar:
-✔ 1. Diversificação
-O ranking valoriza ter mais ativos diferentes.
-✔ 2. Preço médio
-Cada compra altera o “PM”, conceito essencial de investimentos.
-✔ 3. Risco x Retorno
-Ativos variam, e o ranking reflete isso.
-✔ 4. Longo prazo
-O jogo incentiva decisões sustentáveis (não especulativas).
-✔ 5. Patrimônio total
-Não é só “lucro”, mas patrimônio (cash + ativos).
-✔ 6. Comparação saudável entre amigos
-A competição incentiva aprendizado.
+O InvestCup ensina através da prática:
+✔ Diversificação
+✔ Preço médio
+✔ Risco x retorno
+✔ Estratégia
+✔ Evolução do patrimônio
+✔ Tomada de decisão
+✔ Comparação saudável
+Sem aulas cansativas — aprender fazendo.
 ________________________________________
-7. Inovação e Aplicabilidade
-Inovação
-•	Sistema de “Cartola Financeiro” não existe no Brasil.
-•	Uso social do WhatsApp para educação financeira.
-•	Jogo com preços reais do mercado.
-•	Alternativa saudável aos jogos de aposta.
-Aplicabilidade
-•	Funcionaria em escolas, cursinhos, famílias e grupos de amigos.
-•	Pode virar extensão acadêmica (USP, ensino médio, ETEC).
-•	Pode virar produto XP para engajamento jovem.
-•	Possível expansão para:
-o	fundos
-o	renda fixa
-o	ETFs
-o	simulador de risco
-o	quests educativas
+7. Inovação e Diferenciais
+Inovações técnicas
+• Jogo 100% no WhatsApp
+• Combinação WhatsApp + IA + mercado real
+• Firebase para persistência
+• Comentários dinâmicos gerados por IA
+• Multijogador automático
+• Zero fricção (não exige instalação)
+Inovações sociais
+• Alternativa educativa aos jogos de azar
+• Incentiva hábitos financeiros positivos
+• Estimula conversas sobre dinheiro
+• Pode ser usado em escolas, universidades, famílias
 ________________________________________
 8. Sustentabilidade e Riscos
-✔ Riscos Técnicos
-•	Dependência das APIs (Meta e Alpha Vantage).
-•	Limite de requisições por minuto (solucionável com cache).
-✔ Riscos Educacionais
-•	Usuários tentarem “burlar” o jogo
-→ Mitigação: regras e validações no engine.
-✔ Sustentabilidade
-•	Custos quase nulos para operar.
-•	WhatsApp torna o produto altamente escalável.
+Riscos técnicos
+• Rate limit da Meta
+• Limites da Alpha Vantage
+• Crescimento rápido inesperado
+Mitigação:
+• Cache inteligente de preços
+• Uso do Firebase (escala automática)
+• Tokens permanentes
+• Logs e monitoramento
+Sustentabilidade
+• Custo operacional baixíssimo
+• Uso de infra gratuita da Meta e Firebase
+• Escalável para milhares de usuários
 ________________________________________
 9. Roadmap Futuro
-MVP Atual (entrega inicial):
-•	Carteira
-•	Compras e vendas
-•	Ranking
-•	Diversificação
-•	WhatsApp Bot completo
-Versão 2:
-•	Missões diárias
-•	Quiz financeiro integrado ao fluxo
-•	Perfil XP digital para cada jovem
-Versão 3:
-•	Torneios nacionais
-•	Ranking por escola/universidade
-•	Parceria educacional com XP
+MVP Atual – Já Implementado
+• Carteira persistente
+• Comprar e vender
+• Ranking global
+• IA para comentários
+• Preços reais
+• WhatsApp Bot totalmente funcional
 ________________________________________
-Link para o Github do Código Inicial:
+
+
+Versão 2 – Expansão Educativa
+• Missões diárias
+• Quizzes financeiros
+• Sistema de XP e medalhas
+• Alertas educativos personalizados
+________________________________________
+Versão 3 – Plataforma Integrada
+🆕 Integração com o aplicativo mobile
+• Login único sincronizado
+• Painel completo do usuário
+• Dashboard de patrimônio
+• Gráficos e evolução temporal
+• Histórico completo de operações
+• Gamificação avançada
+• Trilhas financeiras guiadas
+• Push notifications
+________________________________________
+Versão 4 – Ecossistema Nacional InvestCup
+• Ranking entre escolas/universidades
+• Trilhas e módulos educacionais
+• Simuladores de investimento
+• Marketplace de cursos básicos
+• API pública para parceiros
+________________________________________
+Link para o Github do Código Inicial e protótipo pronto pelo Command Prompt: GabGorb/HackathonXP
+
+Link para o vídeo da Solução: https://youtu.be/NaqYOfyXKEc
