@@ -1,2 +1,5 @@
 flask
 requests
+firebase-admin
+python-dotenv
+groq
